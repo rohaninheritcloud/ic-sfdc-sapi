@@ -1,0 +1,12 @@
+{
+  "account_number": "",
+  "annual_revenue": 500000000,
+  "billing_state": "",
+  "billing_country": "",
+  "name": "Randeer",
+  "no_of_employees": 100,
+  "phone": 9898989898,
+  "shipping_address": "1th Street HM Colony, Mumbai",
+  "shipping_country": "India",
+  "shipping_city": "Mumbai"
+}

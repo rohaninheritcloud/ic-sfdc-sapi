@@ -1,0 +1,27 @@
+%dw 2.0
+
+type auto_7f244f1d_b39c_4d86_aff1_14e509085779_Output_Payload = Array<Account>
+type Account = {|
+  AccountNumber?: String {"typeId": "AccountNumber"}, 
+  AnnualRevenue?: Number {"typeId": "AnnualRevenue"}, 
+  BillingCountry?: String {"typeId": "BillingCountry"}, 
+  BillingState?: String {"typeId": "BillingState"}, 
+  external_id__c?: String {"typeId": "external_id__c"}, 
+  Id?: String {"typeId": "Id"}, 
+  LastModifiedById?: String, 
+  LastModifiedDate?: DateTime {"typeId": "LastModifiedDate"}, 
+  LastReferencedDate?: DateTime {"typeId": "LastReferencedDate"}, 
+  LastViewedDate?: DateTime {"typeId": "LastViewedDate"}, 
+  Name?: String {"typeId": "Name"}, 
+  NumberOfEmployees?: Number {"typeId": "NumberOfEmployees"}, 
+  OwnerId?: String, 
+  ParentId?: String, 
+  Phone?: String {"typeId": "Phone"}, 
+  ShippingCity?: String {"typeId": "ShippingCity"}, 
+  ShippingCountry?: String {"typeId": "ShippingCountry"}, 
+  sync_new_record_to_db__c?: String {"typeId": "sync_new_record_to_db__c"}
+|} {"label": "Account",
+"typeId": "Account"}
+
+
+

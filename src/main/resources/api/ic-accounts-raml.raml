@@ -1,0 +1,68 @@
+#%RAML 1.0
+title: ic-accounts-raml
+description: Package with collection of Sf System APIs for IC Integrations
+traits:
+  headers:
+    !include /traits/traits.raml
+  trackingParams:
+    headers:
+      X-Correlation-ID:
+        description: A unique identifier for this message, to enable tracking, reporting, and correlation.
+        type: string
+        required: true
+resourceTypes:
+  getCollection: !include /resourceTypes/Collection.raml
+uses:
+  errorDatatype: resources/libraries/ErrorDatatype.raml
+  getAllAccounts: resources/libraries/GetAllAccountsDataType.raml
+  newAccount: resources/libraries/newAccount.raml
+  singleAccount: resources/libraries/GetSingleAccountDetails.raml
+  deleteAccount: /resources/libraries/DeleteDataType.raml
+  updateAccount: /resources/libraries/UpdateDatatype.raml
+/account:
+  is: [headers,trackingParams]
+  description: used to add new account
+  type:
+    getCollection:
+      post-request-schema:
+        newAccount.add_new_account
+      post-request-example:
+        !include examples/requests/createAccountExampleRequest.json
+      post-response-schema: newAccount.account_added_response
+      post-response-example: !include /examples/responses/accountCreationExampleResponse.json
+      get-response-schema:
+        getAllAccounts.get_all_accounts_response
+      get-response-example:
+        !include /examples/responses/getAllAccounts.json
+      errors-schema: errorDatatype.error
+  get:
+  post:
+  /{ID}:
+    is: [headers,trackingParams]
+    description: used to retrieve single account record
+    uriParameters:
+      ID:
+        required: true
+        type: string
+        minLength: 5
+    type:
+      getCollection:
+        get-response-schema:
+            singleAccount.single_account_details
+        get-response-example:
+            !include /examples/responses/getSingleAccount.json
+        delete-response-schema:
+            deleteAccount.delete
+        delete-response-example: !include examples/responses/accountDeletionExampleResponse.json
+        put-request-schema: updateAccount.update_account
+        put-request-example: !include /examples/requests/updateAccountRequestExample.json
+        put-response-schema:
+          updateAccount.account_updated_response
+        put-response-example: !include examples/responses/accountUpdateResponseExample.json
+        errors-schema: errorDatatype.error
+    get:
+    delete:
+    put:
+      
+
+

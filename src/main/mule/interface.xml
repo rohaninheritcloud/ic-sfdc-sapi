@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+    <apikit:config name="ic-accounts-raml-config" api="ic-accounts-raml.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="ic-accounts-raml-main">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="ic-accounts-raml-config" />
+        <error-handler ref="globalError_Handler" />
+    </flow>
+    <flow name="ic-accounts-raml-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="ic-accounts-raml-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\account:application\json:ic-accounts-raml-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  is_success: true,
+  salesforce_id: "0015j00001DifMcAAJ",
+  errors: []
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="delete:\account\(ID):ic-accounts-raml-config">
+        <flow-ref doc:name="Flow Reference" doc:id="15a718ea-e001-4097-b0c6-70b69f20acab" name="Delete_By_Id" />
+    </flow>
+    <flow name="get:\account:ic-accounts-raml-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a0755e19-0ea2-4e25-98c6-ce2c227a7794" name="Get_All_Accounts" />
+    </flow>
+    <flow name="get:\account\(ID):ic-accounts-raml-config">
+        <flow-ref doc:name="Flow Reference" doc:id="01be0b72-a411-40f8-9afa-198c2e3de6c8" name="Get_By_Id" />
+    </flow>
+    <flow name="post:\account:application\json:ic-accounts-raml-config">
+        <flow-ref doc:name="Flow Reference" doc:id="a10becc9-b475-4a84-9051-caa83162659a" name="New_Account_Creation" />
+    </flow>
+    <flow name="put:\account\(ID):application\json:ic-accounts-raml-config">
+        <flow-ref doc:name="Flow Reference" doc:id="aff8148a-e888-41c2-b59f-84c35040adac" name="Update_Account_Object" />
+    </flow>
+</mule>

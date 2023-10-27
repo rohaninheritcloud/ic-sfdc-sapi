@@ -1,0 +1,67 @@
+#%RAML 1.0 Library
+types:
+  single_account_details:
+    description: retrieving all accounts
+    type: object
+    properties:
+      account_number:
+        description: Account Number
+        type: string | nil
+        required: false
+      annual_revenue:
+        description: Annual Revenue
+        type: number
+        required: false
+      billing_state:
+        description: billing state
+        type: string | nil
+        required: false
+      billing_country:
+        description: billing country
+        type: string | nil
+        required: false
+      name:
+        description: account name
+        type: string
+        required: true
+      no_of_employees:
+        description: number of employees
+        type: number
+        required: false
+      phone:
+        description: Contact Number
+        type: number
+        required: false
+      shipping_address:
+        description: shipping address
+        type: string
+        required: false
+      shipping_country:
+        description: shipping_country
+        type: string
+        required: false
+      last_modified_date:
+        description: last modified date
+        type: string
+        required: false
+      last_referenced_date:
+        description: last modified date
+        type: string
+        required: false
+      last_viewed_date:
+        description: last modified date
+        type: string
+        required: false
+      last_modified_by_id:
+        description: last modified by id
+        type: string
+        required: false
+      owner_id:
+        description: owner id
+        type: string
+      parent_id:
+        description: parent id
+        type: string
+      
+
+      

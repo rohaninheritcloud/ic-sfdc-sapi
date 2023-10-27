@@ -1,0 +1,68 @@
+#%RAML 1.0 Library
+types:
+  add_new_account:
+    description: retrieving all accounts
+    type: object
+    properties:
+      account_number:
+        description: Account Number
+        type: string | nil
+        required: true
+      annual_revenue:
+        description: Annual Revenue
+        type: number
+        required: true
+      billing_state:
+        description: billing state
+        type: string | nil
+        required: true
+      billing_country:
+        description: billing country
+        type: string | nil
+        required: true
+      name:
+        description: account name
+        type: string
+        required: true
+        minLength: 1
+      no_of_employees:
+        description: number of employees
+        type: number
+        required: true
+      phone:
+        description: Contact Number
+        type: number
+        required: true
+      shipping_address:
+        description: shipping address
+        type: string
+        required: true
+      shipping_country:
+        description: shipping_country
+        type: string
+        required: true
+      sync_new_record_to_db:
+        description: Sync New Record to DB
+        type: string
+        required: true
+      external_id:
+        description: External Id
+        type: string
+        required: true
+  account_added_response:
+   properties:
+      is_success :
+        description: Success
+        type: boolean
+        required: true
+      response:
+        type: array
+        items:
+          type: object
+          properties:
+           payload:
+            type: object
+            properties:
+              success: boolean
+              id: string
+              errors: array

@@ -1,0 +1,27 @@
+#%RAML 1.0 Library
+types:
+  update_account:
+    description: updating an account
+    type: object
+    properties:
+      id:
+        description: Id
+        type: string | nil
+        required: true
+  account_updated_response:
+   properties:
+      is_success :
+        description: Success
+        type: boolean
+        required: true
+      response:
+        type: array
+        items:
+          type: object
+          properties:
+           payload:
+            type: object
+            properties:
+              success: boolean
+              id: string
+              errors: array

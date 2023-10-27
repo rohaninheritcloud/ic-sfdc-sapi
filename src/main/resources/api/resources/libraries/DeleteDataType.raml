@@ -1,0 +1,19 @@
+#%RAML 1.0 Library
+types:
+  delete:
+   properties:
+      is_success :
+        description: Success
+        type: boolean
+        required: true
+      response:
+        type: array
+        items:
+          type: object
+          properties:
+           payload:
+            type: object
+            properties:
+              success: boolean
+              id: string
+              errors: array
