@@ -80,4 +80,25 @@ output application/java
 			<flow-ref doc:name="sf-common-error-response" doc:id="748dbc6c-1c7b-4a40-9da9-3c86c825b9c8" name="sf-common-error-response" />
 		</on-error-propagate>
 	</error-handler>
+	<sub-flow name="sf-common-error-response" doc:id="3f8fe9cf-ebb7-400b-947c-9a727977f65d">
+		<logger level="ERROR" doc:name="LOG Error Message" doc:id="7556b386-542d-4a94-bd31-517896f98650"
+			message='"Error - HTTP Status Code:" #[vars.vErrorMapping.httpStatus] "Error Message Description :" #[vars.vErrorMapping.errorDescription]' />
+		<set-variable value='#[vars.vErrorMapping.httpStatus]' doc:name="Set Http Status" doc:id="d82ebc53-ee62-49cd-bfef-307e3c08c1fd" variableName="httpStatus" />
+		<ee:transform doc:name="Error Response" doc:id="fd3181a5-4174-4c6b-85ec-282a36123100">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	is_success: false,
+    errors:[
+    {
+        error_code: vars.vErrorMapping.errorCode,
+        error_message: vars.vErrorMapping.errorDescription
+    }]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+
+	</sub-flow>
 	</mule>

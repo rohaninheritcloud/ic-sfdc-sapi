@@ -1,4 +1,5 @@
-{"account_number": "65432430",
+{
+"account_number": "65432430",
 "annual_revenue": 500000000,
 "billing_state": "maharashtra",
 "billing_country": "india",
@@ -9,5 +10,6 @@
 "shipping_country": "India",
 "shipping_city": "Mumbai",
 "sync_new_record_to_db": "true",
+"sync_updated_record_to_db": "true",
 "external_id": "1212"
         }

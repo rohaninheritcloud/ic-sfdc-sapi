@@ -20,5 +20,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 	(owner_id: payload01.OwnerId) if(not isEmpty(payload01.OwnerId)),
 	(parent_id: payload01.ParentId) if(not isEmpty(payload01.ParentId)),
 	(sync_new_record_to_db: payload01.sync_new_record_to_db__c) if(not isEmpty(payload01.sync_new_record_to_db__c)),
+		(sync_update_record_to_db: payload01.sync_update_record_to_db__c) if(not isEmpty(payload01.sync_update_record_to_db__c)),
+	
 	(external_id: payload01.external_id__c) if(not isEmpty(payload01.external_id__c))
 }

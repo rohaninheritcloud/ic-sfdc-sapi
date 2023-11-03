@@ -17,5 +17,6 @@
     "owner_id": "0055j000008ER2EAAW",
     "parent_id": "0015j00001Dgu7wAAB",
     "sync_new_record_to_db": "true",
-    "external_id": "1212"
+    "external_id": "1212",
+    "sync_updated_record_to_db": "true"
   }

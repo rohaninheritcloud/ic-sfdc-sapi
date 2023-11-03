@@ -1,9 +1,14 @@
 #%RAML 1.0
 title: ic-accounts-raml
 description: Package with collection of Sf System APIs for IC Integrations
+protocols:
+  - HTTPS
+version:
+  v1
+mediaType: application/json
 traits:
   headers:
-    !include /traits/traits.raml
+    !include /traits/Traits.raml
   trackingParams:
     headers:
       X-Correlation-ID:
@@ -12,10 +17,12 @@ traits:
         required: true
 resourceTypes:
   getCollection: !include /resourceTypes/Collection.raml
+
+
 uses:
   errorDatatype: resources/libraries/ErrorDatatype.raml
   getAllAccounts: resources/libraries/GetAllAccountsDataType.raml
-  newAccount: resources/libraries/newAccount.raml
+  newAccount: resources/libraries/PostAccount.raml
   singleAccount: resources/libraries/GetSingleAccountDetails.raml
   deleteAccount: /resources/libraries/DeleteDataType.raml
   updateAccount: /resources/libraries/UpdateDatatype.raml
@@ -63,6 +70,5 @@ uses:
     get:
     delete:
     put:
-      
 
 

@@ -6,8 +6,8 @@
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<sub-flow name="Delete_By_Id" doc:id="a8056424-166d-4e92-bd28-2a934011aa24" >
-		<logger level="INFO" doc:name="Logger" doc:id="7f4cd44d-ae17-4f8e-92d6-cc083bccbfbc" message='#["Delete By Account Id Flow Started"]'/>
-		<set-variable value="#[attributes.uriParams.ID]" doc:name="Set Variable" doc:id="699eefe3-31cf-4f58-bacb-e855be525506" variableName="id"/>
+		<logger level="INFO" doc:name="Delete By Account Id Flow Started" doc:id="7f4cd44d-ae17-4f8e-92d6-cc083bccbfbc" message='#["Delete By Account Id Flow Started"]'/>
+		<set-variable value="#[attributes.uriParams.ID]" doc:name="Storing Id from uriParams" doc:id="699eefe3-31cf-4f58-bacb-e855be525506" variableName="id"/>
 		<salesforce:query doc:name="Retrieving Details of Account with ID" doc:id="0c9c9932-4260-4ead-8557-c8ab6a579390" config-ref="Salesforce_Config">
 			<salesforce:salesforce-query ><![CDATA[SELECT Id, Name FROM Account WHERE Id = ':id']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[{
@@ -25,7 +25,7 @@ payload]]></ee:set-payload>
 		<salesforce:delete doc:name="Deleting Account Details By Id" doc:id="4482e1a3-eba1-4ce4-9043-306529b95b7d" config-ref="Salesforce_Config">
 			<salesforce:ids ><![CDATA[#[payload.Id]]]></salesforce:ids>
 		</salesforce:delete>
-		<ee:transform doc:name="Transform Message1" doc:id="a6d049eb-f2f2-4f95-9a1e-0c73053dd677" >
+		<ee:transform doc:name="Dw Set Script Delete Response" doc:id="a6d049eb-f2f2-4f95-9a1e-0c73053dd677" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -38,17 +38,36 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="8488072f-367b-4692-ac72-5422092adb03" message='#["Delete By Account Id Flow Ended"]'/>
+		<logger level="INFO" doc:name="Delete By Account Id Flow Ended" doc:id="8488072f-367b-4692-ac72-5422092adb03" message='#["Delete By Account Id Flow Ended"]'/>
 	</sub-flow>
 	<sub-flow name="New_Account_Creation" doc:id="6637ce97-bb91-45f0-ba62-03c5e7f90e1d" >
-		<logger level="INFO" doc:name="Logger" doc:id="5c081055-a39a-461f-bd01-357f8284f1a7" message='#["New Account Creation Flow Started"]'/>
-		<ee:transform doc:name="Transform Message" doc:id="78a0111d-df86-465a-8fc3-c8b69742e1e3" >
+		<logger level="INFO" doc:name="New Account Creation Flow Started" doc:id="5c081055-a39a-461f-bd01-357f8284f1a7" message='#["New Account Creation Flow Started"]'/>
+		<ee:transform doc:name="Dw Set to Account Created RequestTransform" doc:id="78a0111d-df86-465a-8fc3-c8b69742e1e3" >
 			<ee:message >
-				<ee:set-payload resource="dwl/newAccountCreationdw.dwl" />
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Name: payload.name,
+	BillingState: payload.billing_state as String,
+	BillingCountry: payload.billing_country as String,
+	ShippingStreet: payload.shipping_address,
+	ShippingCity: payload.shipping_city,
+	ShippingCountry: (payload.shipping_country default "") ++ payload.shipping_country,
+	Phone: (payload.phone as String default "") ++ payload.phone as String,
+	AccountNumber: payload.account_number as String,
+	AnnualRevenue: payload.annual_revenue,
+	NumberOfEmployees: payload.no_of_employees,
+	sync_new_record_to_db__c: payload.sync_new_record_to_db__c,
+	sync_updated_record_to_db__c: payload.sync_updated_record_to__db,
+	external_id__c: payload.external_id
+}]]]></ee:set-payload>
 			</ee:message>
+			<ee:variables >
+			</ee:variables>
 		</ee:transform>
-		<salesforce:create type="Account" doc:name="Create" doc:id="f1dd725d-b451-4bae-876e-43a715c0a661" config-ref="Salesforce_Config"/>
-		<ee:transform doc:name="Transform Message1" doc:id="0a6b34cd-4235-41f4-9ef6-44fcc6b367a4" >
+		<salesforce:create type="Account" doc:name="Creating New Account" doc:id="f1dd725d-b451-4bae-876e-43a715c0a661" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="Dw Set to Account Created Response Transform" doc:id="0a6b34cd-4235-41f4-9ef6-44fcc6b367a4" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -61,17 +80,19 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="eccc9228-a80e-4c32-bcad-2dcacb09d00a" message='#["New Account Creation Flow Ended"]'/>
+		<logger level="INFO" doc:name="New Account Creation Flow Ended" doc:id="eccc9228-a80e-4c32-bcad-2dcacb09d00a" message='#["New Account Creation Flow Ended"]'/>
 	</sub-flow>
 	<sub-flow name="Update_Account_Object" doc:id="ffb12ce4-5d05-4534-9c3a-35cf8d15c0d0" >
-		<logger level="INFO" doc:name="Logger" doc:id="4ff08d73-55a3-4ae0-9180-80e58cb16e18" message='#["Updating Account Flow Started"]'/>
-		<ee:transform doc:name="Transform Message" doc:id="e669029f-9323-44cb-adea-68847b4a31ad">
+		<logger level="INFO" doc:name="Updating Account Flow Started" doc:id="4ff08d73-55a3-4ae0-9180-80e58cb16e18" message='#["Updating Account Flow Started"]'/>
+		<ee:transform doc:name="Tranforming Input Payload" doc:id="e669029f-9323-44cb-adea-68847b4a31ad">
 			<ee:message>
-				<ee:set-payload resource="dwl/updateAccount.dwl" />
+				<ee:set-payload resource="dwlScripts/updateAccount.dwl" />
 			</ee:message>
+			<ee:variables >
+			</ee:variables>
 		</ee:transform>
-		<salesforce:update type="Account" doc:name="Update" doc:id="e3ab02cb-e63b-471a-8a8a-7808d49a75c3" config-ref="Salesforce_Config" />
-		<ee:transform doc:name="Transform Message1" doc:id="0ffb6396-4809-4cdb-a71a-bcbac0f4973d">
+		<salesforce:update type="Account" doc:name="Updating the Account Object" doc:id="e3ab02cb-e63b-471a-8a8a-7808d49a75c3" config-ref="Salesforce_Config" />
+		<ee:transform doc:name="Success Transform Message After Successful Updation" doc:id="0ffb6396-4809-4cdb-a71a-bcbac0f4973d">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -84,24 +105,51 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="e7b079b4-9a0b-49de-91fa-3be02d40eb2f" message='#["Updating Account Flow Ended"]'/>
+		<logger level="INFO" doc:name="Updating Account Flow Ended" doc:id="e7b079b4-9a0b-49de-91fa-3be02d40eb2f" message='#["Updating Account Flow Ended"]'/>
 	</sub-flow>
 	<sub-flow name="Get_All_Accounts" doc:id="7a4d68aa-fd9d-4915-a509-ee77f5b3d9a4" >
-		<logger level="INFO" doc:name="Logger" doc:id="15fa7cf6-1527-4486-ada1-d03b6341d479" message='#["Get all Accounts flow Started"]'/>
-		<salesforce:query-all doc:name="Query all" doc:id="db12e63d-9964-436f-bb6b-db1ff7a76b3f" config-ref="Salesforce_Config">
-			<salesforce:salesforce-query ><![CDATA[SELECT Id,AnnualRevenue,BillingState,BillingCountry,external_id__c,ShippingStreet,sync_new_record_to_db__c,AccountNumber,Name,ShippingCountry,ShippingCity,NumberOfEmployees,Phone,LastModifiedDate,LastModifiedById,OwnerId,ParentId,LastReferencedDate,LastViewedDate FROM Account]]></salesforce:salesforce-query>
+		<logger level="INFO" doc:name="Get all Accounts flow Started" doc:id="15fa7cf6-1527-4486-ada1-d03b6341d479" message='#["Get all Accounts flow Started"]'/>
+		<salesforce:query-all doc:name="Retrieving All Acounts Data" doc:id="db12e63d-9964-436f-bb6b-db1ff7a76b3f" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id,AnnualRevenue,BillingState,BillingCountry,external_id__c,ShippingStreet,sync_new_record_to_db__c,sync_update_record_to_db,AccountNumber,Name,ShippingCountry,ShippingCity,NumberOfEmployees,Phone,LastModifiedDate,LastModifiedById,OwnerId,ParentId,LastReferencedDate,LastViewedDate FROM Account]]></salesforce:salesforce-query>
 		</salesforce:query-all>
-		<ee:transform doc:name="Transform Message" doc:id="3531cc32-53b2-4604-8ba0-a8226abd3e43" >
+		<ee:transform doc:name="Transforming Input Accounts Data" doc:id="3531cc32-53b2-4604-8ba0-a8226abd3e43" >
 			<ee:message >
-				<ee:set-payload resource="dwl/getAllAccounts.dwl" />
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	(id: payload01.Id),
+	(account_number: payload01.AccountNumber) if(not isEmpty(payload01.AccountNumber)),
+	(annual_revenue: payload01.AnnualRevenue) if(not isEmpty(payload01.AnnualRevenue)),
+	(billing_state: payload01.BillingState) if(not isEmpty(payload01.BillingState)),
+	(billing_country: payload01.BillingCountry) if(not isEmpty(payload01.BillingCountry)),
+	(name: payload01.Name) if(not isEmpty(payload01.Name)),
+	(no_of_employees: payload01.NumberOfEmployees) if(not isEmpty(payload01.NumberOfEmployees)),
+	(phone: payload01.Phone) if(not isEmpty(payload01.Phone)),
+	(shipping_address: payload01.ShippingStreet) if(not isEmpty(payload01.ShippingStreet)),
+	(shipping_country: payload01.ShippingCountry) if(not isEmpty(payload01.ShippingCountry)),
+	(shipping_city: payload01.ShippingCity) if(not isEmpty(payload01.ShippingCity)),
+	(last_modified_date: payload01.LastModifiedDate) if(not isEmpty(payload01.LastModifiedDate)),
+	(last_viewed_date: payload01.LastViewedDate) if(not isEmpty(payload01.LastViewedDate)),
+	(last_referenced_date: payload01.LastReferencedDate) if(not isEmpty(payload01.LastReferencedDate)),
+	(last_modified_by_id: payload01.LastModifiedById) if(not isEmpty(payload01.LastModifiedById)),
+	(owner_id: payload01.OwnerId) if(not isEmpty(payload01.OwnerId)),
+	(parent_id: payload01.ParentId) if(not isEmpty(payload01.ParentId)),
+	(sync_new_record_to_db: payload01.sync_new_record_to_db__c) if(not isEmpty(payload01.sync_new_record_to_db__c)),
+	(external_id: payload01.external_id__c) if(not isEmpty(payload01.external_id__c)),
+	(sync_update_record_to_db: payload01.sync_update_record_to_db__c) if(not isEmpty(payload01.sync_update_record_to_db__c)),
+	
+}]]></ee:set-payload>
 			</ee:message>
+			<ee:variables >
+			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="a1951d82-db40-4b7f-9db2-a42f6a8911f8" message='#["Get all Accounts flow Ended"]'/>
+		<logger level="INFO" doc:name="Get all Accounts flow Ended" doc:id="a1951d82-db40-4b7f-9db2-a42f6a8911f8" message='#["Get all Accounts flow Ended"]'/>
 	</sub-flow>
 	<sub-flow name="Get_By_Id" doc:id="7f244f1d-b39c-4d86-aff1-14e509085779" >
-		<logger level="INFO" doc:name="Logger" doc:id="f3d27fe1-70b7-4508-903c-d4a529db41f3" message='#["Get By Id Flow Started"]'/>
+		<logger level="INFO" doc:name="Get By Id Flow Started" doc:id="f3d27fe1-70b7-4508-903c-d4a529db41f3" message='#["Get By Id Flow Started"]'/>
 		<salesforce:query doc:name="Retrieving All Accounts Details from Sf" doc:id="187162b3-c89c-4aef-93cd-d8773a863e0b" config-ref="Salesforce_Config">
-			<salesforce:salesforce-query ><![CDATA[SELECT Id,AnnualRevenue,BillingState,BillingCountry,external_id__c,sync_new_record_to_db__c,AccountNumber,Name,ShippingCountry,ShippingCity,ShippingStreet,NumberOfEmployees,Phone,LastModifiedDate,LastModifiedById,OwnerId,ParentId,LastReferencedDate,LastViewedDate FROM Account WHERE Id = ':id']]></salesforce:salesforce-query>
+			<salesforce:salesforce-query ><![CDATA[SELECT Id,AnnualRevenue,BillingState,BillingCountry,external_id__c,sync_update_record_to_db__c,sync_new_record_to_db__c,AccountNumber,Name,ShippingCountry,ShippingCity,ShippingStreet,NumberOfEmployees,Phone,LastModifiedDate,LastModifiedById,OwnerId,ParentId,LastReferencedDate,LastViewedDate FROM Account WHERE Id = ':id']]></salesforce:salesforce-query>
 			<salesforce:parameters ><![CDATA[#[{
 	"id": attributes.uriParams.ID
 }]]]></salesforce:parameters>
@@ -110,12 +158,39 @@ output application/json
 			<when expression="#[sizeOf(payload) &gt; 0]">
 				<ee:transform doc:name="Converting Response to json" doc:id="9a75fa76-20df-4ac3-8014-432db24a8b81">
 			<ee:message>
-						<ee:set-payload resource="dwl/accountsById.dwl" />
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	(id: payload01.Id),
+	(account_number: payload01.AccountNumber) if(not isEmpty(payload01.AccountNumber)),
+	(annual_revenue: payload01.AnnualRevenue) if(not isEmpty(payload01.AnnualRevenue)),
+	(billing_state: payload01.BillingState) if(not isEmpty(payload01.BillingState)),
+	(billing_country: payload01.BillingCountry) if(not isEmpty(payload01.BillingCountry)),
+	(name: payload01.Name) if(not isEmpty(payload01.Name)),
+	(no_of_employees: payload01.NumberOfEmployees) if(not isEmpty(payload01.NumberOfEmployees)),
+	(phone: payload01.Phone) if(not isEmpty(payload01.Phone)),
+	(shipping_address: payload01.ShippingStreet) if(not isEmpty(payload01.ShippingStreet)),
+	(shipping_country: payload01.ShippingCountry) if(not isEmpty(payload01.ShippingCountry)),
+	(shipping_city: payload01.ShippingCity) if(not isEmpty(payload01.ShippingCity)),
+	(last_modified_date: payload01.LastModifiedDate) if(not isEmpty(payload01.LastModifiedDate)),
+	(last_viewed_date: payload01.LastViewedDate) if(not isEmpty(payload01.LastViewedDate)),
+	(last_referenced_date: payload01.LastReferencedDate) if(not isEmpty(payload01.LastReferencedDate)),
+	(last_modified_by_id: payload01.LastModifiedById) if(not isEmpty(payload01.LastModifiedById)),
+	(owner_id: payload01.OwnerId) if(not isEmpty(payload01.OwnerId)),
+	(parent_id: payload01.ParentId) if(not isEmpty(payload01.ParentId)),
+	(sync_new_record_to_db: payload01.sync_new_record_to_db__c) if(not isEmpty(payload01.sync_new_record_to_db__c)),
+		(sync_update_record_to_db: payload01.sync_update_record_to_db__c) if(not isEmpty(payload01.sync_update_record_to_db__c)),
+	
+	(external_id: payload01.external_id__c) if(not isEmpty(payload01.external_id__c))
+}]]></ee:set-payload>
 			</ee:message>
+					<ee:variables >
+					</ee:variables>
 		</ee:transform>
 			</when>
 			<otherwise >
-				<ee:transform doc:name="Transform Message" doc:id="87b43e8d-9f34-442c-aa4d-f42fe3bc9b5d" >
+				<ee:transform doc:name="Invalid Id Response Transform" doc:id="87b43e8d-9f34-442c-aa4d-f42fe3bc9b5d" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -128,27 +203,7 @@ output application/json
 				</ee:transform>
 			</otherwise>
 		</choice>
-		<logger level="INFO" doc:name="Logger" doc:id="d34edf04-7764-423e-98f8-963827517da5" message='#["Get By Id Flow Ended Successfully"]'/>
+		<logger level="INFO" doc:name="Get By Id Flow Ended Successfully" doc:id="d34edf04-7764-423e-98f8-963827517da5" message='#["Get By Id Flow Ended Successfully"]'/>
 	</sub-flow>
-	<sub-flow name="sf-common-error-response" doc:id="512f8f21-39a7-47a4-a7ed-8543772bee78">
-		<logger level="ERROR" doc:name="LOG Error Message" doc:id="a723d3cc-8405-49ef-b851-0af11f81b993"
-			message='"Error - HTTP Status Code:" #[vars.vErrorMapping.httpStatus] "Error Message Description :" #[vars.vErrorMapping.errorDescription]' />
-		<set-variable value='#[vars.vErrorMapping.httpStatus]' doc:name="Set Http Status" doc:id="a0f05df8-2d6d-4659-8719-ce59de978033" variableName="httpStatus" />
-		<ee:transform doc:name="Error Response" doc:id="deeddd3c-46c6-482d-88d7-c89fb885dd1f">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	is_success: false,
-    errors:[
-    {
-        error_code: vars.vErrorMapping.errorCode,
-        error_message: vars.vErrorMapping.errorDescription
-    }]
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-
-	</sub-flow>
+	
 </mule>
